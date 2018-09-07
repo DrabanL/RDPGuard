@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/Core/obj
+/Core/bin
+/MonitorExample/obj
+/MonitorExample/bin
+/packages
+/Utilities/obj
+/Utilities/bin
+/WindowsFirewall/bin
+/WindowsFirewall/obj
