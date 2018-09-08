@@ -6,23 +6,38 @@ using System.Linq;
 using System.Text;
 
 namespace RabanSoft.Utilities {
+    /// <summary>
+    /// Monitor EventLog writes to specific eventlog source/ID
+    /// </summary>
     public class EventLogListener : IDisposable {
 
         private EventLog _eventLog;
-        private int[] _instanceIDs;
+        private long[] _instanceIDs;
 
+        /// <summary>
+        /// A Callback for EventLog write event
+        /// </summary>
         public Action<EventLogMessage> OnMessage;
 
-        public EventLogListener(string eventLogName, params int[] instanceIDs) {
+        /// <summary>
+        /// Monitor EventLog writes to specific eventlog source/ID
+        /// </summary>
+        public EventLogListener(string eventLogName, params long[] instanceIDs) {
             _instanceIDs = instanceIDs;
             _eventLog = new EventLog(eventLogName);
             _eventLog.EntryWritten += eventLog_EntryWritten;
         }
 
+        /// <summary>
+        /// Start monitoring the EventLog 
+        /// </summary>
         public void Start() {
             _eventLog.EnableRaisingEvents = true;
         }
 
+        /// <summary>
+        /// Stop monitoring the EventLog 
+        /// </summary>
         public void Stop() {
             _eventLog.EnableRaisingEvents = false;
         }
@@ -30,9 +45,10 @@ namespace RabanSoft.Utilities {
         private void eventLog_EntryWritten(object sender, EntryWrittenEventArgs e) {
             using (e.Entry) {
                 if (!Array.Exists(_instanceIDs, v => v == e.Entry.InstanceId))
+                    // the written event ID is not monitored
                     return;
 
-                OnMessage?.Invoke(new EventLogMessage(e.Entry.Message, e.Entry.ReplacementStrings));
+                OnMessage?.Invoke(new EventLogMessage(e.Entry.InstanceId, e.Entry.Message, e.Entry.ReplacementStrings));
             }
         }
 

@@ -7,7 +7,11 @@ using System.Threading;
 namespace RDPGuardMonitor {
     internal class Program {
         private static void Main(string[] args) {
-            using (var watcher = new RDPWatcher(new RDPGuardOptions() {
+            // this basic implemetation of RDP Guard to protect from failed RDP attempts
+            // the program is built as Windows Application executable so it will be able to run siliently as a Background process without User Interaction
+
+
+            using (var watcher = new RDPWatcher(new RDPGuardSettings() {
                 AuditFailureLimit = 5,
                 Whitelist = new[] {
                     "10.0.0.0/8",
@@ -21,22 +25,26 @@ namespace RDPGuardMonitor {
                     RuleName = "RDP Audit Failures"
                 }
             })) {
-                watcher.OnAuditFailureEvent += onAuditFailureEvent;
-                watcher.OnIPBlockedEvent += onIPBlockedEvent;
+                watcher.OnAuditFailure += onAuditFailureEvent;
+                watcher.OnIPBlocked += onIPBlockedEvent;
 
                 watcher.Start();
                 SpinWait.SpinUntil(() => { return false; });
 
-                watcher.OnAuditFailureEvent -= onAuditFailureEvent;
-                watcher.OnIPBlockedEvent -= onIPBlockedEvent;
+                watcher.OnAuditFailure -= onAuditFailureEvent;
+                watcher.OnIPBlocked -= onIPBlockedEvent;
             }
         }
 
         private static void onIPBlockedEvent(object sender, RDPEventArgs e) {
+            //e.IsCancel = true;
+
             Debug.WriteLine($"IP Blocked ({e.IP})");
         }
 
         private static void onAuditFailureEvent(object sender, RDPEventArgs e) {
+            //e.IsCancel = true;
+
             Debug.WriteLine($"Audit Failure ({e.IP})");
         }
     }

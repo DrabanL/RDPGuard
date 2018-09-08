@@ -8,76 +8,112 @@ using System.Linq;
 using System.Net;
 
 namespace RabanSoft.RDPGuard.Core {
+    /// <summary>
+    /// Monitor and Block failed RDP session attempts
+    /// </summary>
     public class RDPWatcher : IDisposable {
 
+        /// <summary>
+        /// AuditFailure logs are stored on EventLog "Security" Source
+        /// </summary>
         private const string EVENTLOG_SOURCE = "Security";
+        /// <summary>
+        /// AuditFailure is being IDed 4625
+        /// </summary>
         private const int EVENT_INSTANCE_ID = 4625;
 
-        private readonly FirewallBlockManager _firewallManager;
+        private FirewallBlockManager _firewallBlock;
         private EventLogListener _eventLogListener;
         private OccurrenceCounter<string> _auditFailureCounter;
-        private RDPGuardOptions _options;
+        private RDPGuardSettings _settings;
 
-        public event EventHandler<RDPEventArgs> OnAuditFailureEvent;
-        public event EventHandler<RDPEventArgs> OnIPBlockedEvent;
+        public event EventHandler<RDPEventArgs> OnAuditFailure;
+        public event EventHandler<RDPEventArgs> OnIPBlocked;
 
-        public RDPWatcher(RDPGuardOptions options) {
-            _options = options;
+        /// <summary>
+        /// Monitor and Block failed RDP session attempts
+        /// </summary>
+        public RDPWatcher(RDPGuardSettings settings) {
+            _settings = settings;
 
             _eventLogListener = new EventLogListener(EVENTLOG_SOURCE, EVENT_INSTANCE_ID) {
                 OnMessage = onEventLogMessage
             };
 
-            _auditFailureCounter = new OccurrenceCounter<string>(options.AuditFailureLimit) {
+            _auditFailureCounter = new OccurrenceCounter<string>(settings.AuditFailureLimit) {
                 OnLimitReached = onAuditFailureLimitReached
             };
 
-            _firewallManager = new FirewallBlockManager(options.FirewallSettings ?? new FirewallManagerSettings());
+            _firewallBlock = new FirewallBlockManager(settings.FirewallSettings ?? new FirewallManagerSettings());
 
-            if (options.IsFreshStart)
-                _firewallManager.ClearAllTime();
+            if (settings.IsFreshStart)
+                _firewallBlock.ClearAllTime();
         }
         
         private void onAuditFailureLimitReached(string ip) {
             var ipAddress = IPAddress.Parse(ip);
-            if (ipAddress.IsInRange(_options.Whitelist))
+            if (ipAddress.IsInRange(_settings.Whitelist))
+                // IP is whitelisted
                 return;
 
-            _firewallManager.Add(ip);
-            OnIPBlockedEvent?.Invoke(this, new RDPEventArgs(ip));
+            var eventArg = new RDPEventArgs(ip);
+            OnIPBlocked?.Invoke(this, eventArg);
+            if (!eventArg.IsCancel)
+                _firewallBlock.Add(ip);
         }
 
         private void onEventLogMessage(EventLogMessage obj) {
+            // IP of the AuditFailure log should be stored on offset 19
+
             if (obj.ReplacementStrings.Length < 20)
                 return;
 
             var ip = obj.ReplacementStrings[19];
             if (!IPAddress.TryParse(ip, out var ipAddress))
                 return;
-            
-            _auditFailureCounter.Count(ip);
-            OnAuditFailureEvent?.Invoke(this, new RDPEventArgs(ip));
+
+
+            var eventArg = new RDPEventArgs(ip);
+            OnAuditFailure?.Invoke(this, new RDPEventArgs(ip));
+            if (!eventArg.IsCancel)
+                // add the IP to our limit counter
+                _auditFailureCounter.Count(ip);
         }
 
+        /// <summary>
+        /// Start monitoring for failed RDP session attempts
+        /// </summary>
         public void Start() {
             _eventLogListener.Start();
         }
 
+        /// <summary>
+        /// Stop monitoring for failed RDP session attempts
+        /// </summary>
         public void Stop() {
             _eventLogListener.Stop();
         }
 
+        /// <summary>
+        /// Resets the internal counter
+        /// </summary>
         public void Reset() {
             _auditFailureCounter.Reset();
         }
 
+        /// <summary>
+        /// Resets the internal counter for specific IP
+        /// </summary>
         public void Reset(string ip) {
             _auditFailureCounter.Reset(ip);
         }
 
+        /// <summary>
+        /// Resets the internal counter and removes all blocked IPs from firewall
+        /// </summary>
         public void Clear() {
             _auditFailureCounter.Reset();
-            _firewallManager.Clear();
+            _firewallBlock.Clear();
         }
 
         private void disposeListeners() {

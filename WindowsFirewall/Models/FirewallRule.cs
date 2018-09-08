@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace RabanSoft.WindowsFirewall.Models {
     public class FirewallRule {
+        /// <summary>
+        /// A Limit by Windows Firewall for records count in a Rule
+        /// </summary>
         private const int MAX_RULE_ADDRESS_COUNT = 1000;
 
         private INetFwRule baseRule;
@@ -12,7 +15,7 @@ namespace RabanSoft.WindowsFirewall.Models {
 
         public string Name
             => baseRule.Name;
-
+        
         private List<string> _remoteAddresses = new List<string>();
         
         public FirewallRule(INetFwRule rule) {
@@ -29,6 +32,9 @@ namespace RabanSoft.WindowsFirewall.Models {
             _remoteAddresses.AddRange(baseRule.RemoteAddresses.Split(','));
         }
 
+        /// <summary>
+        /// Returns false if the record count for this rule is reached.
+        /// </summary>
         public bool AddRemoteAddress(string value) {
             if (_remoteAddresses.Contains(value))
                 return true;
