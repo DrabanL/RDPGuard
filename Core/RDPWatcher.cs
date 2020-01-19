@@ -22,7 +22,7 @@ namespace RabanSoft.RDPGuard.Core {
         /// </summary>
         private const int EVENT_INSTANCE_ID = 4625;
 
-        private FirewallBlockManager _firewallBlock;
+        private FirewallManager _firewallBlock;
         private EventLogListener _eventLogListener;
         private OccurrenceCounter<string> _auditFailureCounter;
         private RDPGuardSettings _settings;
@@ -44,10 +44,10 @@ namespace RabanSoft.RDPGuard.Core {
                 OnLimitReached = onAuditFailureLimitReached
             };
 
-            _firewallBlock = new FirewallBlockManager(settings.FirewallSettings ?? new FirewallManagerSettings());
+            _firewallBlock = new FirewallManager(settings.FirewallSettings ?? new FirewallManagerSettings());
 
             if (settings.IsFreshStart)
-                _firewallBlock.ClearAllTime();
+                _firewallBlock.Clear();
         }
         
         private void onAuditFailureLimitReached(string ip) {
@@ -102,18 +102,11 @@ namespace RabanSoft.RDPGuard.Core {
         }
 
         /// <summary>
-        /// Resets the internal counter for specific IP
+        /// Resets the internal counter for specific IP and removes any references to this ip from firewall rules
         /// </summary>
         public void Reset(string ip) {
             _auditFailureCounter.Reset(ip);
-        }
-
-        /// <summary>
-        /// Resets the internal counter and removes all blocked IPs from firewall
-        /// </summary>
-        public void Clear() {
-            _auditFailureCounter.Reset();
-            _firewallBlock.Clear();
+            _firewallBlock.Remove(ip);
         }
 
         private void disposeListeners() {
