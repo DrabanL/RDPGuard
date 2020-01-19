@@ -50,17 +50,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FirewallBlockManager.cs" />
+    <Compile Include="FirewallManager.cs" />
     <Compile Include="Models\FirewallManagerSettings.cs" />
     <Compile Include="Models\FirewallRule.cs" />
+    <Compile Include="Models\NetFwIPProtocols.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FirewallHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\Interop.NetFwTypeLib.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\Interop.NetFwTypeLib.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

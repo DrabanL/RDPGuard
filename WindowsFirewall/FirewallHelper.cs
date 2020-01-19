@@ -15,23 +15,11 @@ namespace RabanSoft.WindowsFirewall {
         /// <summary>
         /// Creates a a firewall rule object
         /// </summary>
-        public static INetFwRule Generate(NET_FW_ACTION_ action, NET_FW_RULE_DIRECTION_ direction, string interfaceTypes) {
-            var rule = (INetFwRule)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+        public static INetFwRule Generate() {
+            var rule = (INetFwRule) Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
 
-            // we assume the rule should be enabled by default
-            rule.Enabled = true;
-
-            rule.InterfaceTypes = interfaceTypes;
-
-            // set to the profile of the local policy
+            // set to the profile of the local policy's profile
             rule.Profiles = _firewallPolicy.CurrentProfileTypes;
-
-            // we do not want to block any address by default
-            rule.RemoteAddresses = "255.255.255.255-255.255.255.255";
-
-            rule.Action = action;
-            rule.Direction = direction;
-
             return rule;
         }
 
@@ -49,7 +37,7 @@ namespace RabanSoft.WindowsFirewall {
         }
 
         /// <summary>
-        /// Add a firewall rule from the local firewall policy based on its Name
+        /// Remove a firewall rule from the local firewall policy based on its Name
         /// </summary>
         public static void Remove(string ruleName) {
             _firewallPolicy.Rules.Remove(ruleName);
