@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="RabanSoft.WindowsFirewallManager, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RabanSoft.WindowsFirewallManager.1.0.1\lib\net40\RabanSoft.WindowsFirewallManager.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.IPNetwork, Version=2.1.2.0, Culture=neutral, PublicKeyToken=717343cc2c25edcf, processorArchitecture=MSIL">
@@ -54,10 +57,6 @@
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{a0aec865-4830-44f8-a27d-338853038f95}</Project>
       <Name>Utilities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WindowsFirewall\WindowsFirewall.csproj">
-      <Project>{7713d502-f319-4b2b-8465-932024940831}</Project>
-      <Name>WindowsFirewall</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

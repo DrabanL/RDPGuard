@@ -1,8 +1,8 @@
 ﻿using RabanSoft.RDPGuard.Core.Models;
 using RabanSoft.Utilities;
 using RabanSoft.Utilities.Models;
-using RabanSoft.WindowsFirewall;
-using RabanSoft.WindowsFirewall.Models;
+using RabanSoft.WindowsFirewallManager;
+using RabanSoft.WindowsFirewallManager.Models;
 using System;
 using System.Linq;
 using System.Net;

@@ -55,10 +55,6 @@
       <Project>{23383680-2f71-4acd-b9fe-86e6a27950b3}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WindowsFirewall\WindowsFirewall.csproj">
-      <Project>{7713D502-F319-4B2B-8465-932024940831}</Project>
-      <Name>WindowsFirewall</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.manifest">
